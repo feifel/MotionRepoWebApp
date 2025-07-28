@@ -1,1 +1,0 @@
-import"../chunks/DsnmJJEf.js";import"../chunks/DmYPTLUW.js";import{j as e,k as p,l as a}from"../chunks/-F4HFozQ.js";var r=e('<h1>Welcome to MotionRepoWebApp 1.0.0</h1> <p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>',1);function s(t){var o=r();a(2),p(t,o)}export{s as component};
