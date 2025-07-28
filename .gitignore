@@ -137,3 +137,17 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Svelte 5 / Vite
+.svelte/
+.svelte-kit/
+vite.config.ts.backup
+*.svelte.gen.ts
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
