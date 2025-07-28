@@ -1,7 +1,50 @@
-import devtoolsJson from 'vite-plugin-devtools-json';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
-	plugins: [sveltekit(), devtoolsJson()]
+    plugins: [
+        sveltekit(),
+        VitePWA({
+            registerType: 'autoUpdate',
+            injectRegister: 'auto',
+            filename: 'sw.js',
+            strategies: 'generateSW',
+            workbox: {
+                globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
+            },
+            manifest: {
+                name: 'Free WebXR Workout App',
+                short_name: 'XR Workout',
+                description: 'A free progressive WebXR Workout app that can be extended by custom exercises.',
+                theme_color: '#ffffff',
+                background_color: '#ffffff',
+                display: 'standalone',
+                scope: '/MotionRepoWebApp/',          // keep this
+                start_url: '/MotionRepoWebApp/',
+                icons: [
+                    {
+                        src: '/pwa-192x192.png',
+                        sizes: '192x192',
+                        type: 'image/png'
+                    },
+                    {
+                        src: '/pwa-512x512.png',
+                        sizes: '512x512',
+                        type: 'image/png'
+                    },
+                    {
+                        src: '/pwa-512x512.png',
+                        sizes: '512x512',
+                        type: 'image/png',
+                        purpose: 'any maskable'
+                    }
+                ]
+            },
+            devOptions: {
+                enabled: true,
+                type: 'module',
+            }
+        })
+    ]
 });
