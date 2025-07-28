@@ -19,8 +19,8 @@ export default defineConfig({
                 name: 'Free WebXR Workout App',
                 short_name: 'XR Workout',
                 description: 'A free progressive WebXR Workout app that can be extended by custom exercises.',
-                theme_color: '#ffff',
-                background_color: '#ffff',
+                theme_color: '#FFFFFF',
+                background_color: '#FFFFFF',
                 display: 'standalone',
                 scope: '/MotionRepoWebApp/',
                 start_url: '/MotionRepoWebApp/',
@@ -36,12 +36,20 @@ export default defineConfig({
                         type: 'image/png'
                     },
                     {
-                        src: '/MotionRepoWebApp/pwa-512x512.png',
+                        src: '/MotionRepoWebApp/pwa-512x512maskable.png',
                         sizes: '512x512',
                         type: 'image/png',
                         purpose: 'any maskable'
                     }
-                ]
+                ],
+                categories: [
+                    'fitness',
+                    'health',
+                    'medical',
+                    'sports',
+                    'utilities'
+                ],
+                id: '39718e84-3bc8-45c4-9021-be919350740b'
             },
             devOptions: {
                 enabled: true,
