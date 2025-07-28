@@ -34,12 +34,6 @@ export default defineConfig({
                         src: '/MotionRepoWebApp/pwa-512x512.png',
                         sizes: '512x512',
                         type: 'image/png'
-                    },
-                    {
-                        src: '/MotionRepoWebApp/pwa-512x512maskable.png',
-                        sizes: '512x512',
-                        type: 'image/png',
-                        purpose: 'any maskable'
                     }
                 ],
                 categories: [
@@ -49,7 +43,9 @@ export default defineConfig({
                     'sports',
                     'utilities'
                 ],
-                id: '39718e84-3bc8-45c4-9021-be919350740b'
+                id: '39718e84-3bc8-45c4-9021-be919350740b',
+                orientation: 'portrait-primary',
+                dir: "ltr"
             },
             devOptions: {
                 enabled: true,
