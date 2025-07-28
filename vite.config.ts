@@ -10,6 +10,7 @@ export default defineConfig({
             injectRegister: 'auto',
             filename: 'sw.js',
             strategies: 'generateSW',
+            base: '/MotionRepoWebApp/',
             workbox: {
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
                 // IMPORTANT: prefix every generated URL with the repo base
@@ -24,7 +25,7 @@ export default defineConfig({
                 theme_color: '#ffffff',
                 background_color: '#ffffff',
                 display: 'standalone',
-                scope: '/MotionRepoWebApp/',          // keep this
+                scope: '/MotionRepoWebApp/',
                 start_url: '/MotionRepoWebApp/',
                 icons: [
                     {
