@@ -69,6 +69,7 @@ web_modules/
 .env
 .env.*
 !.env.example
+!.env.test
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -151,3 +152,11 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# Output
+.output
+.vercel
+.netlify
+.wrangler
+build
+
