@@ -12,6 +12,10 @@ export default defineConfig({
             strategies: 'generateSW',
             workbox: {
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
+                // IMPORTANT: prefix every generated URL with the repo base
+                modifyURLPrefix: {
+                    '': '/MotionRepoWebApp/'
+                }
             },
             manifest: {
                 name: 'Free WebXR Workout App',
