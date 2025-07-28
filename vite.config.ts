@@ -10,20 +10,17 @@ export default defineConfig({
             injectRegister: 'auto',
             filename: 'sw.js',
             strategies: 'generateSW',
-            base: '/MotionRepoWebApp/',
+            base: '/MotionRepoWebApp/',   // <-- ADD THIS LINE
             workbox: {
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
-                // IMPORTANT: prefix every generated URL with the repo base
-                modifyURLPrefix: {
-                    '': '/MotionRepoWebApp/'
-                }
+                modifyURLPrefix: { '': '/MotionRepoWebApp/' }
             },
             manifest: {
                 name: 'Free WebXR Workout App',
                 short_name: 'XR Workout',
                 description: 'A free progressive WebXR Workout app that can be extended by custom exercises.',
-                theme_color: '#ffffff',
-                background_color: '#ffffff',
+                theme_color: '#ffff',
+                background_color: '#ffff',
                 display: 'standalone',
                 scope: '/MotionRepoWebApp/',
                 start_url: '/MotionRepoWebApp/',
