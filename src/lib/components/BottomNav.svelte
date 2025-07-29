@@ -1,15 +1,25 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import { resolve } from '$app/paths';
+    import { page } from '$app/state';
+    import { resolve } from '$app/paths';
+    import { afterNavigate } from '$app/navigation';
+    import { onMount } from 'svelte';
 
-	const navItems = [
-		{ name: 'Workouts', icon: 'workout', path: resolve(`/workouts`) },
-		{ name: 'Motions', icon: 'motions', path: resolve(`/motions`) },
-		{ name: 'Avatars', icon: 'avatars', path: resolve(`/avatars`) },
-		{ name: 'Profile', icon: 'profile', path: resolve(`/profile`) }
-	];
+    let currentPath = '';
 
-	$: currentPath = $page.url.pathname;
+    afterNavigate((navigation) => {
+        currentPath = navigation.to?.url.pathname || page.url.pathname;
+    });
+
+    onMount(() => {
+        currentPath = page.url.pathname;
+    });
+
+    const navItems = [
+        { name: 'Workouts', icon: 'workout', path: resolve(`/workouts`) },
+        { name: 'Motions', icon: 'motions', path: resolve(`/motions`) },
+        { name: 'Avatars', icon: 'avatars', path: resolve(`/avatars`) },
+        { name: 'Profile', icon: 'profile', path: resolve(`/profile`) }
+    ];
 </script>
 
 <nav class="bottom-nav">
@@ -18,7 +28,7 @@
 			href={item.path}
 			class="nav-item"
 			class:active={currentPath === item.path ||
-				(item.path !== resolve(`/`) && currentPath.startsWith(item.path))}
+                (item.path !== '/' && currentPath.startsWith(item.path + '/'))}
 			aria-label={item.name}
 		>
 			<span class="nav-icon">
