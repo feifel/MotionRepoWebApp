@@ -14,11 +14,13 @@
 	.layout {
 		display: flex;
 		flex-direction: column;
-		min-height: 100vh;
+		height: 100vh;
+		overflow: hidden;
 	}
 	main {
 		flex: 1;
-		padding-bottom: 80px;
+		overflow-y: auto;
+		padding: 1rem;
 		box-sizing: border-box;
 	}
 </style>

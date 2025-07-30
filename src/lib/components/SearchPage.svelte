@@ -1,6 +1,17 @@
-<script>
-	export let title;
-	export let description;
+<script lang="ts">
+	export let title: string;
+	export let description: string;
+	export let onSearch: (query: string) => void = () => {};
+
+	let searchTimeout: ReturnType<typeof setTimeout>;
+
+	function handleSearchInput(event: Event) {
+		const query = (event.target as HTMLInputElement).value;
+		clearTimeout(searchTimeout);
+		searchTimeout = setTimeout(() => {
+			onSearch(query);
+		}, 300);
+	}
 </script>
 
 <div class="container">
@@ -20,7 +31,7 @@
 				<circle cx="7" cy="7" r="6"></circle>
 				<path d="m14 14-3-3"></path>
 			</svg>
-			<input type="text" placeholder="Search..." />
+			<input type="text" placeholder="Search..." on:input={handleSearchInput} />
 		</div>
 		<button class="filter-button" aria-label="Filter">
 			<svg

@@ -102,10 +102,6 @@
 
 <style>
     .bottom-nav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
         display: flex;
         justify-content: space-around;
         align-items: center;
@@ -115,6 +111,7 @@
         height: 64px;
         z-index: 1000;
         backdrop-filter: blur(10px);
+        flex-shrink: 0;
     }
 
     .nav-item {
@@ -151,11 +148,6 @@
         font-size: 12px;
         font-weight: 500;
         line-height: 1.2;
-    }
-
-    /* Ensure the body has padding at the bottom to prevent content from being hidden by the nav */
-    :global(body) {
-        padding-bottom: 64px;
     }
 
     /* Responsive adjustments for smaller screens */
