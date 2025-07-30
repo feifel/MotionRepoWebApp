@@ -1,8 +1,9 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { apiRequest } from '$lib/api/config';
 	import SearchPage from '$lib/components/SearchPage.svelte';
-	import { onMount } from 'svelte';
-	import WorkoutDetailModal from '$lib/components/WorkoutDetailModal.svelte';
+	import ModalDialog from '$lib/components/dialogs/ModalDialog.svelte';
+	import WorkoutDetail from '$lib/components/WorkoutDetail.svelte';
 
 	interface Workout {
 		id?: string;
@@ -175,7 +176,9 @@
 </SearchPage>
 
 {#if showModal && selectedWorkout}
-	<WorkoutDetailModal workout={selectedWorkout} on:close={closeWorkoutModal} />
+	<ModalDialog on:close={closeWorkoutModal} title={selectedWorkout.name ?? 'Unknown'}>
+		<WorkoutDetail workout={selectedWorkout} />
+	</ModalDialog>
 {/if}
 
 <style>

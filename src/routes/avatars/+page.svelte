@@ -1,8 +1,9 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { apiRequest } from '$lib/api/config';
 	import SearchPage from '$lib/components/SearchPage.svelte';
-	import { onMount } from 'svelte';
-	import AvatarDetailModal from '$lib/components/AvatarDetailModal.svelte';
+	import ModalDialog from '$lib/components/dialogs/ModalDialog.svelte';
+	import AvatarDetail from '$lib/components/AvatarDetail.svelte';
 
 	interface Avatar {
 		id?: string;
@@ -170,7 +171,9 @@
 </SearchPage>
 
 {#if showModal && selectedAvatar}
-	<AvatarDetailModal avatar={selectedAvatar} on:close={closeAvatarModal} />
+	<ModalDialog on:close={closeAvatarModal} title={selectedAvatar.name ?? 'Unknown'}>
+		<AvatarDetail avatar={selectedAvatar} />
+	</ModalDialog>
 {/if}
 
 <style>

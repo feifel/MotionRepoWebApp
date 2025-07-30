@@ -1,8 +1,9 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { apiRequest } from '$lib/api/config';
 	import SearchPage from '$lib/components/SearchPage.svelte';
-	import { onMount } from 'svelte';
-	import MotionDetailModal from '$lib/components/MotionDetailModal.svelte';
+	import ModalDialog from '$lib/components/dialogs/ModalDialog.svelte';
+	import MotionDetail from '$lib/components/MotionDetail.svelte';
 
 	interface Motion {
 		id?: string;
@@ -226,7 +227,9 @@
 </SearchPage>
 
 {#if showModal && selectedMotion}
-	<MotionDetailModal motion={selectedMotion} on:close={closeMotionModal} />
+	<ModalDialog on:close={closeMotionModal} title={selectedMotion.name ?? 'Unknown'}>
+		<MotionDetail motion={selectedMotion} />
+	</ModalDialog>
 {/if}
 
 <style>
@@ -266,6 +269,7 @@
 	.muscle-group,
 	.equip,
 	.label {
+		display: inline-block;
 		background: var(--surface-3);
 		color: var(--text-2);
 		padding: 0.125rem 0.375rem;

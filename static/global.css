@@ -63,16 +63,10 @@ html, body, #app {
     color: var(--color-neutral-shade1);
 }
 
-.tag {
-    display: inline-block;
-    background: var(--color-primary-shade1);
-    color: var(--color-neutral-tint1);
-    padding: 0.25rem 0.5rem;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    margin: 0.25rem 0.25rem 0 0;
-}
-
 .categories {
     margin-top: 0.5rem;
+}
+
+input[type="checkbox"] {
+  accent-color: var(--color-primary);
 }
