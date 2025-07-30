@@ -36,7 +36,43 @@ html, body, #app {
     border: 1px solid var(--color-primary-shade1);
 }
 
+.result-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
 .result-card h3 {
     color: var(--color-primary);
     margin-top: 0;
+}
+
+.loading,
+.error,
+.no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.2rem;
+}
+
+.error {
+    color: var(--color-neutral);
+}
+
+.no-results {
+    color: var(--color-neutral-shade1);
+}
+
+.tag {
+    display: inline-block;
+    background: var(--color-primary-shade1);
+    color: var(--color-neutral-tint1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    margin: 0.25rem 0.25rem 0 0;
+}
+
+.categories {
+    margin-top: 0.5rem;
 }
