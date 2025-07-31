@@ -33,7 +33,7 @@
 			id: "file",
 			type: "text",
 			label: "File",
-			values: [workout.name || "N/A"]
+			values: [workout.file || "N/A"]
 		},
 		{
 			id: "categories",

@@ -70,3 +70,8 @@ html, body, #app {
 input[type="checkbox"] {
   accent-color: var(--color-primary);
 }
+
+*:focus-visible {
+  outline: 2px solid #ff69b4; /* Hot pink outline */
+  outline-offset: 2px; /* Optional: adds space between element and outline */
+}

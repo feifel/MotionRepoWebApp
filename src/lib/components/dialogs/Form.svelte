@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { Row } from './form.types';
     import TagPicker from '../elements/TagPicker.svelte';
+	import ComboBox from '../elements/ComboBox.svelte';
 
     export let rows: Row[];
     export let readonly: boolean | undefined = true;
@@ -39,12 +40,13 @@
                 class:disabled={readonly} 
                 id={row.id} 
                 name={row.id} 
-                rows="1" 
+                rows="3" 
                 readonly={readonly} 
                 disabled={readonly}>{row.values[0]}</textarea>
         {:else if row.type === 'enum' && row.options && row.options.length > 0}
             <label class="label" title={row.label} for={row.id}>{row.label}</label>
-            <select class="text-input"
+            <ComboBox bind:selectedTags={row.values} allTags={row.options} readonly={readonly} id={row.id} />
+            <!--select class="text-input"
                 class:disabled={readonly} 
                 id={row.id}
                 value={row.values[0] || ''} 
@@ -52,7 +54,7 @@
                 {#each row.options as option}
                     <option value={option}>{option}</option>
                 {/each}                
-            </select>
+            </select-->
         {:else if row.type === 'tags'}
             <label class="label" title={row.label} for={row.id}>{row.label}</label>
             <TagPicker id={row.id} bind:selectedTags={row.values} existingTags={row.options} readonly={readonly}/>
