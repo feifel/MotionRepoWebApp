@@ -48,7 +48,35 @@
 			label: "Categories",
 			values: avatar.categories || []
 		}
-	]; 
+	];
+
+	function handleFormSubmit(updatedRows: Row[]) {
+		// Update the avatar object with the new values from the form
+		updatedRows.forEach(row => {
+			switch (row.id) {
+				case "description":
+					avatar.description = row.values[0] || "";
+					break;
+				case "file":
+					avatar.fileName = row.values[0] || "";
+					break;
+				case "fileType":
+					avatar.fileType = row.values[0] || "";
+					break;
+				case "gender":
+					avatar.gender = row.values[0] || "";
+					break;
+				case "categories":
+					avatar.categories = row.values;
+					break;
+			}
+		});
+
+		// Here you would typically send the updated avatar to your server
+		console.log('Avatar updated:', avatar);
+		alert('Submit is not yet implemented\n\nJSON Data:\n' + JSON.stringify(avatar, null, 2));
+		// TODO: Add API call to send updated avatar to server
+	}
 
 </script>
 
@@ -58,7 +86,7 @@
             <img src={avatar.screenshot} alt={`[image of '${avatar.name || 'Avatar'}' is missing]`} class="screenshot" />
         </div>
     {/if}
-	<Form rows={form} readonly={false}/>
+	<Form rows={form} readonly={false} onSubmit={handleFormSubmit}/>
 </div>
 <style>
 	.body {

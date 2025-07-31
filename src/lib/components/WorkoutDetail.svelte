@@ -41,7 +41,29 @@
 			label: "Categories",
 			values: workout.categories || []
 		}
-	]; 
+	];
+
+	function handleFormSubmit(updatedRows: Row[]) {
+		// Update the workout object with the new values from the form
+		updatedRows.forEach(row => {
+			switch (row.id) {
+				case "description":
+					workout.description = row.values[0] || "";
+					break;
+				case "file":
+					workout.file = row.values[0] || "";
+					break;
+				case "categories":
+					workout.categories = row.values;
+					break;
+			}
+		});
+
+		// Here you would typically send the updated workout to your server
+		console.log('Workout updated:', workout);
+		alert('Submit is not yet implemented\n\nJSON Data:\n' + JSON.stringify(workout, null, 2));
+		// TODO: Add API call to send updated workout to server
+	} 
 </script>
 
 <div class="body">
@@ -50,7 +72,7 @@
 			<img src={workout.screenshot} alt={`[image of '${workout.name || 'Workout'}' is missing]`} class="screenshot" />
 		</div>
 	{/if}
-	<Form rows={form} readonly={false}/>
+	<Form rows={form} readonly={false} onSubmit={handleFormSubmit}/>
 </div>
 
 <style>

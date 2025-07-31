@@ -83,7 +83,56 @@
 			label: "Labels",
 			values: motion.labels || []
 		}
-	]; 
+	];
+
+	function handleFormSubmit(updatedRows: Row[]) {
+		// Update the motion object with the new values from the form
+		updatedRows.forEach(row => {
+			switch (row.id) {
+				case "description":
+					motion.description = row.values[0] || "";
+					break;
+				case "file":
+					motion.file = row.values[0] || "";
+					break;
+				case "fileType":
+					motion.fileType = row.values[0] || "";
+					break;
+				case "level":
+					// Convert string to number for level
+					const levelMap: { [key: string]: number } = {
+						"beginner": 1,
+						"intermediate": 2,
+						"advanced": 3
+					};
+					motion.level = levelMap[row.values[0]] || 2;
+					break;
+				case "equipment":
+					motion.equipment = row.values;
+					break;
+				case "bodyParts":
+					motion.bodyParts = row.values;
+					break;
+				case "muscleGroups":
+					motion.muscleGroups = row.values;
+					break;
+				case "categories":
+					motion.categories = row.values;
+					break;
+				case "primaryJoints":
+					motion.primaryJoints = row.values;
+					break;
+				case "labels":
+					motion.labels = row.values;
+					break;
+			}
+		});
+
+		// Here you would typically send the updated motion to your server
+		console.log('Motion updated:', motion);
+		alert('Submit is not yet implemented\n\nJSON Data:\n' + JSON.stringify(motion, null, 2));
+		// TODO: Add API call to send updated motion to server
+	} 
 
 </script>
 
@@ -93,7 +142,7 @@
 			<img src={motion.screenshot} alt={`[image of '${motion.name || 'Avatar'}' is missing]`} class="screenshot" />
 		</div>
 	{/if}
-	<Form rows={form} readonly={false}/>
+	<Form rows={form} readonly={false} onSubmit={handleFormSubmit}/>
 </div>
 
 <style>

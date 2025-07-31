@@ -5,9 +5,15 @@
 
     export let rows: Row[];
     export let readonly: boolean | undefined = true;
+    export let onSubmit: ((updatedRows: Row[]) => void) | undefined = undefined;
 
-    function handleSubmit() {
-        console.log('Form submitted:', rows);
+    function handleSubmit(event: Event) {
+        event.preventDefault();
+        if (onSubmit) {
+            onSubmit(rows);
+        } else {
+            console.log('Form submitted:', rows);
+        }
     }
 </script>
 
