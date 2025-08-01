@@ -6,8 +6,9 @@
 <button class="filter-button" aria-label={ariaLabel} onclick={onClick}>
 	<svg
 		xmlns="http://www.w3.org/2000/svg"
-		width="16"
-		height="16"
+		width="20"
+		height="20"
+		viewBox="0 0 20 20"
 		fill="none"
 		stroke="currentColor"
 		stroke-width="2"
@@ -15,22 +16,26 @@
 		stroke-linejoin="round"
 		class="lucide lucide-filter"
 	>
-		<polygon points="14 2 2 2 7 9 7 13 9 14 9 9 14 2"></polygon>
+		<polygon points="17.5 2.5 2.5 2.5 8.75 11.25 8.75 16.25 11.25 17.5 11.25 11.25 17.5 2.5"></polygon>
 	</svg>
 </button>
 
 <style>
 	.filter-button {
 		background-color: var(--color-primary);
-		color: white;
 		border: none;
-		padding: 9px 14px;
+		padding: 8px;
 		border-radius: 5px;
 		cursor: pointer;
 		font-size: 1rem;
-		width: fit-content;
+		width: 42px;
+		height: 42px;
 		flex-shrink: 0;
 		margin-right: 10px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
 	}
 
 	.filter-button:hover {

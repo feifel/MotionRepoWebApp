@@ -35,12 +35,14 @@
 <style>
 	.button {
 		background-color: var(--color-primary);
-		color: white;
+		color: var(--color-neutral-tint1);
 		border: none;
-		padding: 8px;
+		padding: 7px;
 		border-radius: 5px;
 		cursor: pointer;
 		font-size: 1rem;
+		width: 42px;
+		height: 42px;
 		width: fit-content;
 		flex-shrink: 0;
 		display: flex;
