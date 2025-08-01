@@ -5,6 +5,7 @@
 	import ModalDialog from '$lib/components/dialogs/ModalDialog.svelte';
 	import AvatarDetail from '$lib/avatars/AvatarDetail.svelte';
 	import AvatarFilter from '$lib/avatars/AvatarFilter.svelte';
+	import AvatarCard from '$lib/avatars/AvatarCard.svelte';
 	import type { Avatar } from '$lib/avatars/Avatar.types';
 
 	let avatars: Avatar[] = [];
@@ -203,26 +204,7 @@
 			<div class="no-results">No avatars found.</div>
 		{:else}
 			{#each avatars as avatar}
-				<div
-					class="result-card"
-					on:click={() => openAvatarModal(avatar)}
-					on:keydown={(e) => e.key === 'Enter' && openAvatarModal(avatar)}
-					tabindex="0"
-					role="button"
-				>
-					<h3>{avatar.name ?? 'Unnamed Avatar'}</h3>
-					<p>{avatar.description ?? 'No description available.'}</p>
-					{#if avatar.gender}
-						<span class="tag">{avatar.gender}</span>
-					{/if}
-					{#if avatar.categories && avatar.categories.length > 0}
-						<div class="categories">
-							{#each avatar.categories as category}
-								<span class="tag">{category}</span>
-							{/each}
-						</div>
-					{/if}
-				</div>
+				<AvatarCard {avatar} onClick={openAvatarModal} />
 			{/each}
 		{/if}
 	</div>
@@ -248,20 +230,7 @@
 		gap: 1rem;
 	}
 
-	.result-card {
-		cursor: pointer;
-		transition: transform 0.2s, box-shadow 0.2s;
-	}
 
-	.result-card:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-	}
-
-	.result-card:focus {
-		outline: 2px solid var(--color-primary);
-		outline-offset: 2px;
-	}
 
 	.loading,
 	.error,

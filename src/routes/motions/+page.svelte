@@ -5,9 +5,10 @@
 	import ModalDialog from '$lib/components/dialogs/ModalDialog.svelte';
 	import MotionDetail from '$lib/motions/MotionDetail.svelte';
 	import MotionFilter from '$lib/motions/MotionFilter.svelte';
+	import MotionCard from '$lib/motions/MotionCard.svelte';
 	import type { Motion } from '$lib/motions/Motion.types';
 
-	let motions: Motion[] = [];
+	let motions: Motion[] = []
 	let allMotions: Motion[] = [];
 	let loading = true;
 	let error: string | null = null;
@@ -221,65 +222,7 @@
 			<div class="no-results">No motions found.</div>
 		{:else}
 			{#each motions as motion}
-				<div
-					class="result-card"
-					on:click={() => openMotionModal(motion)}
-					role="button"
-					tabindex="0"
-					on:keydown={(e) => e.key === 'Enter' && openMotionModal(motion)}
-				>
-					<h3>{motion.name || 'Unnamed Motion'}</h3>
-					<p>{motion.description || 'No description available.'}</p>
-					<div class="motion-details">
-						{#if motion.fileType}
-							<span class="file-type">{motion.fileType}</span>
-						{/if}
-						{#if motion.level !== undefined}
-							<span class="level">Level {motion.level}</span>
-						{/if}
-						{#if motion.file}
-							<span class="file-name">{motion.file}</span>
-						{/if}
-					</div>
-					{#if motion.categories && motion.categories.length > 0}
-						<div class="categories">
-							{#each motion.categories as category}
-								<span class="category">{category}</span>
-							{/each}
-						</div>
-					{/if}
-					{#if motion.bodyParts && motion.bodyParts.length > 0}
-						<div class="body-parts">
-							<strong>Body Parts:</strong>
-							{#each motion.bodyParts as part}
-								<span class="body-part">{part}</span>
-							{/each}
-						</div>
-					{/if}
-					{#if motion.muscleGroups && motion.muscleGroups.length > 0}
-						<div class="muscle-groups">
-							<strong>Muscle Groups:</strong>
-							{#each motion.muscleGroups as muscle}
-								<span class="muscle-group">{muscle}</span>
-							{/each}
-						</div>
-					{/if}
-					{#if motion.equipment && motion.equipment.length > 0}
-						<div class="equipment">
-							<strong>Equipment:</strong>
-							{#each motion.equipment as equip}
-								<span class="equip">{equip}</span>
-							{/each}
-						</div>
-					{/if}
-					{#if motion.labels && motion.labels.length > 0}
-						<div class="labels">
-							{#each motion.labels as label}
-								<span class="label">{label}</span>
-							{/each}
-						</div>
-					{/if}
-				</div>
+				<MotionCard {motion} onClick={openMotionModal} />
 			{/each}
 		{/if}
 	</div>
@@ -298,51 +241,6 @@
 {/if}
 
 <style>
-	.motion-details {
-		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 1rem;
-		font-size: 0.875rem;
-		flex-wrap: wrap;
-	}
-
-	.motion-details span {
-		background: var(--surface-2);
-		padding: 0.25rem 0.5rem;
-		border-radius: 4px;
-		color: var(--text-2);
-	}
-
-	.categories,
-	.body-parts,
-	.muscle-groups,
-	.equipment,
-	.labels {
-		margin-bottom: 0.75rem;
-		font-size: 0.875rem;
-	}
-
-	.body-parts strong,
-	.muscle-groups strong,
-	.equipment strong {
-		margin-right: 0.5rem;
-		color: var(--text-1);
-	}
-
-	.category,
-	.body-part,
-	.muscle-group,
-	.equip,
-	.label {
-		display: inline-block;
-		background: var(--surface-3);
-		color: var(--text-2);
-		padding: 0.125rem 0.375rem;
-		border-radius: 3px;
-		margin-right: 0.25rem;
-		font-size: 0.75rem;
-	}
-
 	@media (max-width: 768px) {
 		.result-grid {
 			grid-template-columns: 1fr;

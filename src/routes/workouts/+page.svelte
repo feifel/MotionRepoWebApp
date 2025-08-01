@@ -5,6 +5,7 @@
 	import ModalDialog from '$lib/components/dialogs/ModalDialog.svelte';
 	import WorkoutDetail from '$lib/workouts/WorkoutDetail.svelte';
 	import WorkoutFilter from '$lib/workouts/WorkoutFilter.svelte';
+	import WorkoutCard from '$lib/workouts/WorkoutCard.svelte';
 	import type { Workout } from '$lib/workouts/Workout.types';
 
 	let workouts: Workout[] = [];
@@ -204,31 +205,7 @@
 			<div class="no-results">No workouts found.</div>
 		{:else}
 			{#each workouts as workout}
-				<div
-					class="result-card"
-					on:click={() => openWorkoutModal(workout)}
-					on:keydown={(e) => e.key === 'Enter' && openWorkoutModal(workout)}
-					tabindex="0"
-					role="button"
-				>
-					<h3>{workout.name || 'Unnamed Workout'}</h3>
-					<p>{workout.description || 'No description available.'}</p>
-					<div class="workout-meta">
-						{#if workout.difficulty}
-							<span class="tag difficulty-{workout.difficulty.toLowerCase()}">{workout.difficulty}</span>
-						{/if}
-						{#if workout.duration}
-							<span class="tag">{workout.duration} min</span>
-						{/if}
-					</div>
-					{#if workout.categories && workout.categories.length > 0}
-						<div class="categories">
-							{#each workout.categories as category}
-								<span class="tag">{category}</span>
-							{/each}
-						</div>
-					{/if}
-				</div>
+				<WorkoutCard {workout} onClick={openWorkoutModal} />
 			{/each}
 		{/if}
 	</div>
@@ -247,42 +224,6 @@
 {/if}
 
 <style>
-	.result-card {
-		cursor: pointer;
-		transition: transform 0.2s, box-shadow 0.2s;
-	}
-
-	.result-card:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-	}
-
-	.result-card:focus {
-		outline: 2px solid var(--color-primary);
-		outline-offset: 2px;
-	}
-
-	.workout-meta {
-		display: flex;
-		gap: 0.5rem;
-		margin: 0.5rem 0;
-	}
-
-	.difficulty-beginner {
-		background-color: #4caf50;
-		color: white;
-	}
-
-	.difficulty-intermediate {
-		background-color: #ff9800;
-		color: white;
-	}
-
-	.difficulty-advanced {
-		background-color: #f44336;
-		color: white;
-	}
-
 	.loading,
 	.error,
 	.no-results {
