@@ -79,7 +79,7 @@
         font-weight: bold;
     }
 
-    input, textarea, select {        
+    input, textarea {        
         background: var(--color-bg-neutral);
         border: 1px solid var(--color-primary);
         border-radius: 4px;

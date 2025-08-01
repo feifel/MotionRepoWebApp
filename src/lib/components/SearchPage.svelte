@@ -1,9 +1,15 @@
 <script lang="ts">
+	import { createEventDispatcher } from 'svelte';
 	export let title: string;
 	export let description: string;
-	export let onSearch: (query: string) => void = () => {};
+	export let onSearch: (query: string) => void;
+	export let onFilterClick: () => void;
+	export let selectedFilters: string[] = [];
+
+	const dispatch = createEventDispatcher();
 
 	let searchTimeout: ReturnType<typeof setTimeout>;
+	let searchInput: HTMLInputElement;
 
 	function handleSearchInput(event: Event) {
 		const query = (event.target as HTMLInputElement).value;
@@ -11,6 +17,11 @@
 		searchTimeout = setTimeout(() => {
 			onSearch(query);
 		}, 300);
+	}
+
+	function removeTag(tag: string) {
+		selectedFilters = selectedFilters.filter((t) => t !== tag);
+		dispatch('filterChanged', selectedFilters);
 	}
 </script>
 
@@ -31,9 +42,9 @@
 				<circle cx="7" cy="7" r="6"></circle>
 				<path d="m14 14-3-3"></path>
 			</svg>
-			<input type="text" placeholder="Search..." on:input={handleSearchInput} />
+			<input type="text" placeholder="Search..." oninput={handleSearchInput} />
 		</div>
-		<button class="filter-button" aria-label="Filter">
+		<button class="filter-button" aria-label="Filter" onclick={onFilterClick}>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				width="16"
@@ -49,10 +60,28 @@
 			</svg>
 		</button>
 	</div>
-
+	{#if selectedFilters?.length > 0}
+		<div class="selected-filters">
+			{#each selectedFilters as tag}
+			<span class="filter-tag">{tag}
+				<span
+					class="tag-remove"
+					role="button"
+					tabindex="0"
+					aria-label="Remove tag {tag}"
+					onclick={() => removeTag(tag)}
+					onkeydown={(e) => {
+						if (e.key === 'Enter' || e.key === ' ') {
+							e.preventDefault();
+							removeTag(tag);
+						}
+					}}>×</span>
+			</span>
+			{/each}
+		</div>
+	{/if}
 	<h1>{title}</h1>
 	<p>{description}</p>
-
 	<slot />
 </div>
 
@@ -122,4 +151,28 @@
 		margin-bottom: 0.5rem;
 	}
 
+	.selected-filters {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.filter-tag {
+		display: inline-block;
+		background: var(--color-primary-shade1);
+		color: var(--color-neutral-tint1);
+		padding: 0.3rem 0.7rem;
+		align-items: center;
+		border-radius: 16px;
+		font-size: 0.8rem;
+		font-weight: 500;
+	}
+
+	.tag-remove {
+		margin-left: 6px;
+		cursor: pointer;
+		font-size: 16px;
+		line-height: 1;
+		opacity: 0.8;
+	}
 </style>

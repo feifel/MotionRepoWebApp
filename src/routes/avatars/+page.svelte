@@ -4,7 +4,7 @@
 	import SearchPage from '$lib/components/SearchPage.svelte';
 	import ModalDialog from '$lib/components/dialogs/ModalDialog.svelte';
 	import AvatarDetail from '$lib/components/AvatarDetail.svelte';
-
+	import AvatarFilter from '$lib/components/AvatarFilter.svelte';
 	interface Avatar {
 		id?: string;
 		name?: string;
@@ -12,18 +12,21 @@
 		gender?: string;
 		categories?: string[];
 		fileName?: string;
-		file?: string;
+		fileType?: string;
 		screenshot?: string;
-		createdAt?: string;
-		updatedAt?: string;
-		createdBy?: string;
 	}
-
 	let avatars: Avatar[] = [];
+	let allAvatars: Avatar[] = [];
 	let loading = true;
 	let error: string | null = null;
+
 	let selectedAvatar: Avatar | null = null;
 	let showModal = false;
+	let showFilterModal = false;
+
+	let selectedFilters: string[] = [];
+
+	let currentSearchQuery = '';
 
 	async function fetchAvatars(search = '', offset = 0, limit = 20): Promise<Avatar[]> {
 		try {
@@ -40,19 +43,19 @@
 			console.log('Received avatars data:', data);
 			console.log('Type of data:', typeof data);
 			console.log('Data structure:', Array.isArray(data) ? 'Array' : 'Object', data);
-			
+
 			// Check if data is wrapped in an object
 			const avatarsArray = Array.isArray(data) ? data : data.avatars || data.items || data.data || [];
 			console.log('Processed avatars array:', avatarsArray);
 			console.log('Number of avatars:', avatarsArray.length);
-			
+
 			return avatarsArray;
 		} catch (err) {
 			console.error('Error fetching avatars:', err);
 
 			// For development/testing, return mock data if localhost is not available
 			console.warn('Using mock data for development');
-			
+
 			// Return mock data filtered by search
 			return [
 				{
@@ -88,8 +91,8 @@
 					createdAt: '2024-01-17T10:00:00Z',
 					createdBy: 'trainer1'
 				}
-			].filter(avatar => 
-				!search || 
+			].filter(avatar =>
+				!search ||
 				avatar.name?.toLowerCase().includes(search.toLowerCase()) ||
 				avatar.description?.toLowerCase().includes(search.toLowerCase()) ||
 				avatar.categories?.some(cat => cat.toLowerCase().includes(search.toLowerCase()))
@@ -99,10 +102,55 @@
 		}
 	}
 
+	function filterAvatars(
+		avatars: Avatar[],
+		search: string,
+		filters: string[]
+	): Avatar[] {
+		const lowerCaseSearch = search.toLowerCase();
+
+		const categoryFilters = filters
+			.filter((f) => f.startsWith('category:'))
+			.map((f) => f.replace('category:', ''));
+		const genderFilters = filters
+			.filter((f) => f.startsWith('gender:'))
+			.map((f) => f.replace('gender:', ''));
+
+		return avatars.filter((avatar) => {
+			const matchesSearch =
+				!search ||
+				(avatar.name?.toLowerCase().includes(lowerCaseSearch) ?? false) ||
+				(avatar.description?.toLowerCase().includes(lowerCaseSearch) ?? false);
+
+			const matchesCategory =
+				categoryFilters.length === 0 ||
+				categoryFilters.every((cat) => avatar.categories?.includes(cat) ?? false);
+
+			const matchesGender =
+				genderFilters.length === 0 || genderFilters.includes(avatar.gender ?? '');
+
+			return matchesSearch && matchesCategory && matchesGender;
+		});
+	}
+
+	async function applyFiltersAndSearch() {
+		loading = true;
+		error = null;
+		try {
+			if (allAvatars.length === 0) {
+				allAvatars = await fetchAvatars(); // Fetch all avatars only once
+			}
+			avatars = filterAvatars(allAvatars, currentSearchQuery, selectedFilters);
+		} catch (e: any) {
+			error = e.message;
+		} finally {
+			loading = false;
+		}
+	}
+
 	async function handleSearch(query: string) {
-		console.log('Search triggered with query:', query);
-		avatars = await fetchAvatars(query);
-		console.log('Avatars updated after search, length:', avatars.length);
+		currentSearchQuery = query;
+		await applyFiltersAndSearch();
 	}
 
 	function openAvatarModal(avatar: Avatar) {
@@ -115,17 +163,29 @@
 		selectedAvatar = null;
 	}
 
-	// Handle Escape key to close modal
+	function openFilterModal() {
+		showFilterModal = true;
+	}
+
+	function closeFilterModal() {
+		showFilterModal = false;
+	}
+
+	function handleFilterUpdate(event: string[]) {
+		selectedFilters = event;
+		closeFilterModal();
+		applyFiltersAndSearch();
+	}
+
 	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === 'Escape' && showModal) {
+		if (event.key === 'Escape') {
 			closeAvatarModal();
+			closeFilterModal();
 		}
 	}
 
 	onMount(async () => {
-		console.log('Component mounted, fetching initial avatars...');
-		avatars = await fetchAvatars();
-		console.log('Initial avatars loaded, length:', avatars.length);
+		await applyFiltersAndSearch();
 	});
 </script>
 
@@ -133,10 +193,16 @@
 
 <SearchPage
 	title="Avatars"
-	description="Browse and search for avatars."
+	description="Browse through all available avatars."
 	onSearch={handleSearch}
+	onFilterClick={openFilterModal}
+	on:filterChanged={(event) => {
+		selectedFilters = event.detail;
+		handleFilterUpdate(event.detail);
+	}}
+	bind:selectedFilters
 >
-	<div class="result-grid">
+	<div class="container">
 		{#if loading}
 			<div class="loading">Loading avatars...</div>
 		{:else if error}
@@ -145,15 +211,15 @@
 			<div class="no-results">No avatars found.</div>
 		{:else}
 			{#each avatars as avatar}
-				<div 
-					class="result-card" 
-					on:click={() => openAvatarModal(avatar)} 
-					on:keydown={(e) => e.key === 'Enter' && openAvatarModal(avatar)} 
-					tabindex="0" 
+				<div
+					class="result-card"
+					on:click={() => openAvatarModal(avatar)}
+					on:keydown={(e) => e.key === 'Enter' && openAvatarModal(avatar)}
+					tabindex="0"
 					role="button"
 				>
-					<h3>{avatar.name || 'Unnamed Avatar'}</h3>
-					<p>{avatar.description || 'No description available.'}</p>
+					<h3>{avatar.name ?? 'Unnamed Avatar'}</h3>
+					<p>{avatar.description ?? 'No description available.'}</p>
 					{#if avatar.gender}
 						<span class="tag">{avatar.gender}</span>
 					{/if}
@@ -171,12 +237,25 @@
 </SearchPage>
 
 {#if showModal && selectedAvatar}
-	<ModalDialog on:close={closeAvatarModal} title={selectedAvatar.name ?? 'Unknown'}>
+	<ModalDialog title={selectedAvatar.name ?? 'Unknown'} on:close={closeAvatarModal}>
 		<AvatarDetail avatar={selectedAvatar} />
 	</ModalDialog>
 {/if}
 
+{#if showFilterModal}
+	<ModalDialog title="Filter Avatars" on:close={closeFilterModal}>
+		<AvatarFilter selectedFilters={selectedFilters} onFilter={handleFilterUpdate} />
+	</ModalDialog>
+{/if}
+
 <style>
+	.container {
+		padding: 1rem 2rem;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+		gap: 1rem;
+	}
+
 	.result-card {
 		cursor: pointer;
 		transition: transform 0.2s, box-shadow 0.2s;

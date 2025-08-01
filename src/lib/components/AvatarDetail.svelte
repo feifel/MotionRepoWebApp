@@ -18,10 +18,16 @@
 
     let form: Row[] = [
 		{
+			id: "name",
+			type: "text",
+			label: "Name",
+			values: [avatar.name || ""]
+		},
+		{
 			id: "description",
 			type: "textarea",
 			label: "Description",
-			values: [avatar.description || "N/A"]
+			values: [avatar.description || ""]
 		},
 		{
 			id: "file",
@@ -39,7 +45,7 @@
 			id: "gender",
 			type: "enum",
 			label: "Gender",
-			values: [avatar.gender || "N/A"],
+			values: [avatar.gender || "None"],
 			options: ["Male", "Female", "None"]
 		},
 		{
@@ -54,6 +60,9 @@
 		// Update the avatar object with the new values from the form
 		updatedRows.forEach(row => {
 			switch (row.id) {
+				case "name":
+					avatar.name = row.values[0] || "";
+					break;
 				case "description":
 					avatar.description = row.values[0] || "";
 					break;
