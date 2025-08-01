@@ -3,18 +3,10 @@
 	import { apiRequest } from '$lib/api/config';
 	import SearchPage from '$lib/components/SearchPage.svelte';
 	import ModalDialog from '$lib/components/dialogs/ModalDialog.svelte';
-	import AvatarDetail from '$lib/components/AvatarDetail.svelte';
-	import AvatarFilter from '$lib/components/AvatarFilter.svelte';
-	interface Avatar {
-		id?: string;
-		name?: string;
-		description?: string;
-		gender?: string;
-		categories?: string[];
-		fileName?: string;
-		fileType?: string;
-		screenshot?: string;
-	}
+	import AvatarDetail from '$lib/avatars/AvatarDetail.svelte';
+	import AvatarFilter from '$lib/avatars/AvatarFilter.svelte';
+	import type { Avatar } from '$lib/avatars/Avatar.types';
+
 	let avatars: Avatar[] = [];
 	let allAvatars: Avatar[] = [];
 	let loading = true;

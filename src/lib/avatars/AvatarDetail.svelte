@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Form from "./dialogs/Form.svelte";
-	import type { Row } from "./dialogs/form.types";
+    import Form from "../components/dialogs/Form.svelte";
+	import type { Row } from "../components/dialogs/form.types";
 
 
 	interface Avatar {

@@ -3,7 +3,7 @@
 	import { apiRequest } from '$lib/api/config';
 	import SearchPage from '$lib/components/SearchPage.svelte';
 	import ModalDialog from '$lib/components/dialogs/ModalDialog.svelte';
-	import MotionDetail from '$lib/components/MotionDetail.svelte';
+	import MotionDetail from '$lib/motions/MotionDetail.svelte';
 
 	interface Motion {
 		id?: string;

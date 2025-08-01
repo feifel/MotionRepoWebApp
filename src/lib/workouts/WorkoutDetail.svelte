@@ -1,25 +1,8 @@
 <script lang="ts">
-	import Form from "./dialogs/Form.svelte";
-	import type { Row } from "./dialogs/form.types";
-
-	interface Workout {
-		id?: string;
-		name?: string;
-		description?: string;
-		difficulty?: string;
-		duration?: number;
-		equipment?: string[];
-		bodyParts?: string[];
-		muscleGroups?: string[];
-		categories?: string[];
-		exercises?: string[];
-		file?: string;
-		screenshot?: string;
-		createdAt?: string;
-		updatedAt?: string;
-		createdBy?: string;
-	}
-
+	import Form from "../components/dialogs/Form.svelte";
+	import type { Row } from "../components/dialogs/form.types";
+	import type { Workout } from "./Workout.types";
+	
 	export let workout: Workout;
 
     let form: Row[] = [

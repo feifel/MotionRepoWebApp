@@ -1,22 +1,7 @@
 <script lang="ts">
-	import Form from "./dialogs/Form.svelte";
-    import type { Row } from "./dialogs/form.types";
-
-	interface Motion {
-		id?: string;
-		name?: string;
-		description?: string;
-		file?: string;
-		fileType?: string;
-		screenshot?: string;
-		level?: number;
-		equipment?: string[];
-		bodyParts?: string[];
-		muscleGroups?: string[];
-		categories?: string[];
-		primaryJoints?: string[];
-		labels?: string[];
-	}
+	import Form from "../components/dialogs/Form.svelte";
+    import type { Row } from "../components/dialogs/form.types";
+	import type { Motion } from "./Motion.types";
 
 	export let motion: Motion;
     

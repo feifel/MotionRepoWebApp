@@ -3,7 +3,7 @@
 	import { apiRequest } from '$lib/api/config';
 	import SearchPage from '$lib/components/SearchPage.svelte';
 	import ModalDialog from '$lib/components/dialogs/ModalDialog.svelte';
-	import WorkoutDetail from '$lib/components/WorkoutDetail.svelte';
+	import WorkoutDetail from '$lib/workouts/WorkoutDetail.svelte';
 
 	interface Workout {
 		id?: string;
