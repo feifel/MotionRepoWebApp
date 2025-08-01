@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Tag from './Tag.svelte';
 	interface Props {
 		id: string;
 		existingTags?: string[];
@@ -190,24 +191,7 @@
 	{/if}
 	<div class="selected-tags">
 		{#each selectedTags as tag}
-			<span class="tag">
-				{tag}
-				{#if !readonly}
-					<span
-						class="tag-remove"
-						role="button"
-						tabindex="0"
-						aria-label="Remove tag {tag}"
-						onclick={() => removeTag(tag)}
-						onkeydown={(e) => {
-							if (e.key === 'Enter' || e.key === ' ') {
-								e.preventDefault();
-								removeTag(tag);
-							}
-						}}>×</span
-					>
-				{/if}
-			</span>
+			<Tag {tag} {readonly} onRemove={removeTag} />
 		{/each}
 	</div>
 
@@ -332,32 +316,10 @@
 		padding: 0.7rem 0rem 0.7rem 0rem;
 	}
 
-	.tag {
-		display: inline-block;
-		background: var(--color-primary-shade1);
-		color: var(--color-neutral-tint1);
-		padding: 0.3rem 0.7rem;
-		align-items: center;
-		border-radius: 16px;
-		font-size: 0.8rem;
-		font-weight: 500;
-	}
-
-	.tag-remove {
-		margin-left: 6px;
-		cursor: pointer;
-		font-size: 16px;
-		line-height: 1;
-		opacity: 0.8;
-	}
-
-	.tag-remove:hover {
-		opacity: 1;
-	}
-
 	.no-tags {
 		color: #666;
 		font-style: italic;
 		margin-top: 16px;
 	}
+
 </style>

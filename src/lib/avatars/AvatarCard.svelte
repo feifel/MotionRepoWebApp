@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Avatar } from '$lib/avatars/Avatar.types';
+	import Tag from '$lib/components/elements/Tag.svelte';
 
 	export let avatar: Avatar;
 	export let onClick: (avatar: Avatar) => void;
@@ -14,62 +15,23 @@
 >
 	<h3>{avatar.name ?? 'Unnamed Avatar'}</h3>
 	<p>{avatar.description ?? 'No description available.'}</p>
-	{#if avatar.gender}
-		<span class="tag">{avatar.gender}</span>
-	{/if}
-	{#if avatar.categories && avatar.categories.length > 0}
-		<div class="categories">
+	<div class="tags">
+		{#if avatar.gender}
+			<Tag tag='Gender: {avatar.gender}' readonly={true} />
+		{/if}
+		{#if avatar.categories && avatar.categories.length > 0}
 			{#each avatar.categories as category}
-				<span class="tag">{category}</span>
+				<Tag tag='Category: {category}' readonly={true} />
 			{/each}
-		</div>
-	{/if}
+		{/if}
+	</div>	
 </div>
 
 <style>
-	.result-card {
-		cursor: pointer;
-		transition: transform 0.2s, box-shadow 0.2s;
-	}
-
-	.result-card:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-	}
-
-	.result-card:focus {
-		outline: 2px solid var(--color-primary);
-		outline-offset: 2px;
-	}
-
-
-	h3 {
-		margin: 0 0 0.5rem 0;
-		font-size: 1.2rem;
-		color: var(--color-text);
-	}
-
-	p {
-		margin: 0 0 1rem 0;
-		color: var(--color-text-secondary);
-		font-size: 0.9rem;
-		line-height: 1.4;
-	}
-
-	.categories {
+	.tags {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.25rem;
-		margin-top: 0.5rem;
-	}
-
-	.tag {
-		display: inline-block;
-		padding: 0.25rem 0.5rem;
-		background: var(--color-primary-light);
-		color: var(--color-primary);
-		border-radius: 12px;
-		font-size: 0.75rem;
-		font-weight: 500;
+		gap: 8px;
+		padding: 0.7rem 0rem 0.7rem 0rem;
 	}
 </style>
