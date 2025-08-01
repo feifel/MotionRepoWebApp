@@ -4,28 +4,20 @@
 	import SearchPage from '$lib/components/SearchPage.svelte';
 	import ModalDialog from '$lib/components/dialogs/ModalDialog.svelte';
 	import MotionDetail from '$lib/motions/MotionDetail.svelte';
-
-	interface Motion {
-		id?: string;
-		name?: string;
-		description?: string;
-		file?: string;
-		fileType?: string;
-		screenshot?: string;
-		level?: number;
-		equipment?: string[];
-		bodyParts?: string[];
-		muscleGroups?: string[];
-		categories?: string[];
-		primaryJoints?: string[];
-		labels?: string[];
-	}
+	import MotionFilter from '$lib/motions/MotionFilter.svelte';
+	import type { Motion } from '$lib/motions/Motion.types';
 
 	let motions: Motion[] = [];
+	let allMotions: Motion[] = [];
 	let loading = true;
 	let error: string | null = null;
 	let selectedMotion: Motion | null = null;
 	let showModal = false;
+	let showFilterModal = false;
+
+	let selectedFilters: string[] = [];
+
+	let currentSearchQuery = '';
 
 	async function fetchMotions(search = '', offset = 0, limit = 20): Promise<Motion[]> {
 		try {
@@ -40,17 +32,17 @@
 			console.log('Fetching motions with params:', params.toString());
 			const data = await apiRequest(`/motions?${params}`);
 			console.log('Received motions data:', data);
-			
+
 			const motionsArray = Array.isArray(data) ? data : data.motions || data.items || data.data || [];
 			console.log('Processed motions array:', motionsArray);
-			
+
 			return motionsArray;
 		} catch (err) {
 			console.error('Error fetching motions:', err);
 
 			// For development/testing, return mock data if localhost is not available
 			console.warn('Using mock data for development');
-			
+
 			return [
 				{
 					id: '1',
@@ -116,10 +108,58 @@
 		}
 	}
 
+	function filterMotions(
+		motions: Motion[],
+		search: string,
+		filters: string[]
+	): Motion[] {
+		const lowerCaseSearch = search.toLowerCase();
+
+		const categoryFilters = filters
+			.filter((f) => f.startsWith('category:'))
+			.map((f) => f.replace('category:', ''));
+		const levelFilters = filters
+			.filter((f) => f.startsWith('level:'))
+			.map((f) => f.replace('level:', ''));
+
+		return motions.filter((motion) => {
+			const matchesSearch =
+				!search ||
+				(motion.name?.toLowerCase().includes(lowerCaseSearch) ?? false) ||
+				(motion.description?.toLowerCase().includes(lowerCaseSearch) ?? false);
+
+			const matchesCategory =
+				categoryFilters.length === 0 ||
+				categoryFilters.every((cat) => motion.categories?.includes(cat) ?? false);
+
+			const levelMap: { [key: string]: number } = { 'Beginner': 1, 'Intermediate': 2, 'Advanced': 3, 'Expert': 4 };
+			const numericLevelFilters = levelFilters.map(l => levelMap[l]).filter(Boolean);
+
+			const matchesLevel =
+				numericLevelFilters.length === 0 || numericLevelFilters.includes(motion.level ?? 0);
+
+			return matchesSearch && matchesCategory && matchesLevel;
+		});
+	}
+
+	async function applyFiltersAndSearch() {
+		loading = true;
+		error = null;
+		try {
+			if (allMotions.length === 0) {
+				allMotions = await fetchMotions(); // Fetch all motions only once
+			}
+			motions = filterMotions(allMotions, currentSearchQuery, selectedFilters);
+		} catch (e: any) {
+			error = e.message;
+		} finally {
+			loading = false;
+		}
+	}
+
 	async function handleSearch(query: string) {
-		console.log('Search triggered with query:', query);
-		motions = await fetchMotions(query);
-		console.log('Motions updated after search, length:', motions.length);
+		currentSearchQuery = query;
+		await applyFiltersAndSearch();
 	}
 
 	function openMotionModal(motion: Motion) {
@@ -132,32 +172,45 @@
 		selectedMotion = null;
 	}
 
+	function openFilterModal() {
+		showFilterModal = true;
+	}
+
+	function closeFilterModal() {
+		showFilterModal = false;
+	}
+
+	function handleFilterUpdate(event: string[]) {
+		selectedFilters = event;
+		closeFilterModal();
+		applyFiltersAndSearch();
+	}
+
 	// Handle Escape key to close modal
 	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === 'Escape' && showModal) {
+		if (event.key === 'Escape') {
 			closeMotionModal();
+			closeFilterModal();
 		}
 	}
 
-	onMount(() => {
-		document.addEventListener('keydown', handleKeydown);
-		return () => {
-			document.removeEventListener('keydown', handleKeydown);
-		};
-	});
-
 	onMount(async () => {
-		console.log('Component mounted, fetching initial motions...');
-		motions = await fetchMotions();
-		loading = false;
-		console.log('Initial motions loaded, length:', motions.length);
+		await applyFiltersAndSearch();
 	});
 </script>
+
+<svelte:window on:keydown={handleKeydown} />
 
 <SearchPage
 	title="Motions"
 	description="Browse and search for motions."
 	onSearch={handleSearch}
+	onFilterClick={openFilterModal}
+	on:filterChanged={(event) => {
+		selectedFilters = event.detail;
+		handleFilterUpdate(event.detail);
+	}}
+	bind:selectedFilters
 >
 	<div class="result-grid">
 		{#if loading}
@@ -168,7 +221,13 @@
 			<div class="no-results">No motions found.</div>
 		{:else}
 			{#each motions as motion}
-				<div class="result-card" on:click={() => openMotionModal(motion)} role="button" tabindex="0" on:keydown={(e) => e.key === 'Enter' && openMotionModal(motion)}>
+				<div
+					class="result-card"
+					on:click={() => openMotionModal(motion)}
+					role="button"
+					tabindex="0"
+					on:keydown={(e) => e.key === 'Enter' && openMotionModal(motion)}
+				>
 					<h3>{motion.name || 'Unnamed Motion'}</h3>
 					<p>{motion.description || 'No description available.'}</p>
 					<div class="motion-details">
@@ -229,6 +288,12 @@
 {#if showModal && selectedMotion}
 	<ModalDialog on:close={closeMotionModal} title={selectedMotion.name ?? 'Unknown'}>
 		<MotionDetail motion={selectedMotion} />
+	</ModalDialog>
+{/if}
+
+{#if showFilterModal}
+	<ModalDialog title="Filter Motions" on:close={closeFilterModal}>
+		<MotionFilter selectedFilters={selectedFilters} onFilter={handleFilterUpdate} />
 	</ModalDialog>
 {/if}
 

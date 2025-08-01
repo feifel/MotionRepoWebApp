@@ -4,29 +4,20 @@
 	import SearchPage from '$lib/components/SearchPage.svelte';
 	import ModalDialog from '$lib/components/dialogs/ModalDialog.svelte';
 	import WorkoutDetail from '$lib/workouts/WorkoutDetail.svelte';
-
-	interface Workout {
-		id?: string;
-		name?: string;
-		description?: string;
-		difficulty?: string;
-		duration?: number;
-		equipment?: string[];
-		bodyParts?: string[];
-		muscleGroups?: string[];
-		categories?: string[];
-		exercises?: string[];
-		screenshot?: string;
-		createdAt?: string;
-		updatedAt?: string;
-		createdBy?: string;
-	}
+	import WorkoutFilter from '$lib/workouts/WorkoutFilter.svelte';
+	import type { Workout } from '$lib/workouts/Workout.types';
 
 	let workouts: Workout[] = [];
+	let allWorkouts: Workout[] = [];
 	let loading = true;
 	let error: string | null = null;
 	let selectedWorkout: Workout | null = null;
 	let showModal = false;
+	let showFilterModal = false;
+
+	let selectedFilters: string[] = [];
+
+	let currentSearchQuery = '';
 
 	async function fetchWorkouts(search = '', offset = 0, limit = 20): Promise<Workout[]> {
 		try {
@@ -40,7 +31,7 @@
 
 			const data = await apiRequest(`/workouts?${params}`);
 			const workoutsArray = Array.isArray(data) ? data : data.workouts || data.items || data.data || [];
-			
+
 			return workoutsArray;
 		} catch (err) {
 			console.error('Error fetching workouts:', err);
@@ -92,8 +83,8 @@
 					createdAt: '2024-01-17T10:00:00Z',
 					createdBy: 'trainer1'
 				}
-			].filter(workout => 
-				!search || 
+			].filter(workout =>
+				!search ||
 				workout.name?.toLowerCase().includes(search.toLowerCase()) ||
 				workout.description?.toLowerCase().includes(search.toLowerCase()) ||
 				workout.categories?.some(cat => cat.toLowerCase().includes(search.toLowerCase()))
@@ -103,8 +94,55 @@
 		}
 	}
 
+	function filterWorkouts(
+		workouts: Workout[],
+		search: string,
+		filters: string[]
+	): Workout[] {
+		const lowerCaseSearch = search.toLowerCase();
+
+		const categoryFilters = filters
+			.filter((f) => f.startsWith('category:'))
+			.map((f) => f.replace('category:', ''));
+		const difficultyFilters = filters
+			.filter((f) => f.startsWith('difficulty:'))
+			.map((f) => f.replace('difficulty:', ''));
+
+		return workouts.filter((workout) => {
+			const matchesSearch =
+				!search ||
+				(workout.name?.toLowerCase().includes(lowerCaseSearch) ?? false) ||
+				(workout.description?.toLowerCase().includes(lowerCaseSearch) ?? false);
+
+			const matchesCategory =
+				categoryFilters.length === 0 ||
+				categoryFilters.every((cat) => workout.categories?.includes(cat) ?? false);
+
+			const matchesDifficulty =
+				difficultyFilters.length === 0 || difficultyFilters.includes(workout.difficulty ?? '');
+
+			return matchesSearch && matchesCategory && matchesDifficulty;
+		});
+	}
+
+	async function applyFiltersAndSearch() {
+		loading = true;
+		error = null;
+		try {
+			if (allWorkouts.length === 0) {
+				allWorkouts = await fetchWorkouts();
+			}
+			workouts = filterWorkouts(allWorkouts, currentSearchQuery, selectedFilters);
+		} catch (e: any) {
+			error = e.message;
+		} finally {
+			loading = false;
+		}
+	}
+
 	async function handleSearch(query: string) {
-		workouts = await fetchWorkouts(query);
+		currentSearchQuery = query;
+		await applyFiltersAndSearch();
 	}
 
 	function openWorkoutModal(workout: Workout) {
@@ -117,15 +155,30 @@
 		selectedWorkout = null;
 	}
 
+	function openFilterModal() {
+		showFilterModal = true;
+	}
+
+	function closeFilterModal() {
+		showFilterModal = false;
+	}
+
+	function handleFilterUpdate(event: string[]) {
+		selectedFilters = event;
+		closeFilterModal();
+		applyFiltersAndSearch();
+	}
+
 	// Handle Escape key to close modal
 	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === 'Escape' && showModal) {
+		if (event.key === 'Escape') {
 			closeWorkoutModal();
+			closeFilterModal();
 		}
 	}
 
 	onMount(async () => {
-		workouts = await fetchWorkouts();
+		await applyFiltersAndSearch();
 	});
 </script>
 
@@ -135,6 +188,12 @@
 	title="Workouts"
 	description="Browse and search for workouts."
 	onSearch={handleSearch}
+	onFilterClick={openFilterModal}
+	on:filterChanged={(event) => {
+		selectedFilters = event.detail;
+		handleFilterUpdate(event.detail);
+	}}
+	bind:selectedFilters
 >
 	<div class="result-grid">
 		{#if loading}
@@ -145,11 +204,11 @@
 			<div class="no-results">No workouts found.</div>
 		{:else}
 			{#each workouts as workout}
-				<div 
-					class="result-card" 
-					on:click={() => openWorkoutModal(workout)} 
-					on:keydown={(e) => e.key === 'Enter' && openWorkoutModal(workout)} 
-					tabindex="0" 
+				<div
+					class="result-card"
+					on:click={() => openWorkoutModal(workout)}
+					on:keydown={(e) => e.key === 'Enter' && openWorkoutModal(workout)}
+					tabindex="0"
 					role="button"
 				>
 					<h3>{workout.name || 'Unnamed Workout'}</h3>
@@ -178,6 +237,12 @@
 {#if showModal && selectedWorkout}
 	<ModalDialog on:close={closeWorkoutModal} title={selectedWorkout.name ?? 'Unknown'}>
 		<WorkoutDetail workout={selectedWorkout} />
+	</ModalDialog>
+{/if}
+
+{#if showFilterModal}
+	<ModalDialog title="Filter Workouts" on:close={closeFilterModal}>
+		<WorkoutFilter selectedFilters={selectedFilters} onFilter={handleFilterUpdate} />
 	</ModalDialog>
 {/if}
 
