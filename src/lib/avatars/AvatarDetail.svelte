@@ -1,20 +1,18 @@
 <script lang="ts">
+    import { onMount } from 'svelte';
+    import * as BABYLON from '@babylonjs/core';
+    import '@babylonjs/loaders/glTF';
     import Form from "../components/dialogs/Form.svelte";
 	import type { Row } from "../components/dialogs/form.types";
-
-
-	interface Avatar {
-		id?: string;
-		name?: string;
-		description?: string;
-		gender?: string;
-		categories?: string[];
-		fileName?: string;
-		fileType?: string;
-		screenshot?: string;
-	}
+	import type { Avatar } from "./Avatar.types";
 
 	export let avatar: Avatar;
+
+    let canvas: HTMLCanvasElement;
+    let engine: BABYLON.Engine;
+    let scene: BABYLON.Scene;
+    let isLoading = false;
+    let errorMessage = '';
 
     let form: Row[] = [
 		{
@@ -56,6 +54,141 @@
 		}
 	];
 
+    onMount(() => {
+        if (canvas && avatar.fileName) {
+            initializeBabylonScene();
+        }
+        
+        return () => {
+            if (engine) {
+                engine.dispose();
+            }
+        };
+    });
+
+    async function initializeBabylonScene() {
+        if (!canvas || !avatar.fileName) return;
+
+        isLoading = true;
+        errorMessage = '';
+        
+        try {
+            // Create engine and scene
+            engine = new BABYLON.Engine(canvas, true);
+            scene = new BABYLON.Scene(engine);
+
+            // Create camera
+			const camera = new BABYLON.ArcRotateCamera(
+                "camera",
+                Math.PI / 2,
+                Math.PI / 2,
+                3,
+                new BABYLON.Vector3(0, 0, 0),
+                scene
+            );
+            camera.attachControl(canvas, true);
+            camera.lowerRadiusLimit = 1;
+            camera.upperRadiusLimit = 10;
+
+            // Create lights
+            const light1 = new BABYLON.HemisphericLight(
+                "light1",
+                new BABYLON.Vector3(0, 1, 0),
+                scene
+            );
+            light1.intensity = 0.7;
+
+            const light2 = new BABYLON.DirectionalLight(
+                "light2",
+                new BABYLON.Vector3(-1, -2, -1),
+                scene
+            );
+            light2.intensity = 0.5;
+
+			// Create ground plane
+			const ground = BABYLON.MeshBuilder.CreateGround("ground", {
+				width: 2,
+				height: 2,
+				subdivisions: 4
+			}, scene);
+			
+			// Position ground below the model (will be adjusted after model loads)
+			ground.position.y = 0;
+			
+			// Create ground material
+			const groundMaterial = new BABYLON.StandardMaterial("groundMaterial", scene);
+			groundMaterial.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.8);
+			groundMaterial.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
+			ground.material = groundMaterial;
+				
+
+			// Enable ground to receive shadows
+			ground.receiveShadows = true;
+			
+            // Load GLB file
+            const modelUrl = avatar.fileName;
+            const result = await BABYLON.SceneLoader.LoadAssetContainerAsync(
+                modelUrl,
+                "",
+                scene
+            );
+
+            // Add all meshes to the scene
+            result.addAllToScene();
+
+            // Center and scale the model
+            const meshes = result.meshes;
+            if (meshes.length > 0) {
+                const boundingInfo = scene.getWorldExtends();
+                const size = boundingInfo.max.subtract(boundingInfo.min);
+                const maxDim = Math.max(size.x, size.y, size.z);
+                
+                if (maxDim > 0) {
+                    const scale = 2 / maxDim;
+                    meshes.forEach(mesh => {
+                        mesh.scaling.scaleInPlace(scale);
+                    });
+                }
+
+                // Center the model
+                const center = boundingInfo.min.add(boundingInfo.max).scale(0.5);
+                meshes.forEach(mesh => {
+                    mesh.position = mesh.position.subtract(center);
+                });
+            }
+
+            // Enable shadows
+            const shadowGenerator = new BABYLON.ShadowGenerator(1024, light2);
+            meshes.forEach(mesh => {
+                if (mesh.receiveShadows) {
+                    shadowGenerator.addShadowCaster(mesh);
+                    mesh.receiveShadows = true;
+                }
+            });
+
+            // Render loop
+            engine.runRenderLoop(() => {
+                scene.render();
+            });
+
+            // Handle window resize
+            const handleResize = () => {
+                engine.resize();
+            };
+            window.addEventListener('resize', handleResize);
+
+            return () => {
+                window.removeEventListener('resize', handleResize);
+            };
+
+        } catch (error) {
+            console.error('Error loading GLB file:', error);
+            errorMessage = 'Failed to load 3D model. Please check if the file exists.';
+        } finally {
+            isLoading = false;
+        }
+    }
+
 	function handleFormSubmit(updatedRows: Row[]) {
 		// Update the avatar object with the new values from the form
 		updatedRows.forEach(row => {
@@ -90,13 +223,27 @@
 </script>
 
 <div class="body">
-    {#if avatar.screenshot}
-        <div class="screenshot-container">
-            <img src={avatar.screenshot} alt={`[image of '${avatar.name || 'Avatar'}' is missing]`} class="screenshot" />
+    {#if avatar.fileName}
+        <div class="scene-container">
+            <div class="canvas-container">
+                <canvas bind:this={canvas} width="400" height="400"></canvas>
+                {#if isLoading}
+                    <div class="loading-overlay">
+                        <div class="loading-spinner"></div>
+                        <p>Loading 3D model...</p>
+                    </div>
+                {/if}
+                {#if errorMessage}
+                    <div class="error-overlay">
+                        <p>{errorMessage}</p>
+                    </div>
+                {/if}
+            </div>
         </div>
     {/if}
 	<Form rows={form} readonly={false} onSubmit={handleFormSubmit}/>
 </div>
+
 <style>
 	.body {
 		padding: 1rem 2rem 2rem 2rem;
@@ -104,9 +251,57 @@
 		flex: 1;
 	}
 
-	.screenshot-container {
+	.scene-container {
 		text-align: center;
 		margin-bottom: 2rem;
+	}
+
+	.canvas-container {
+		position: relative;
+		display: inline-block;
+		border-radius: 8px;
+		overflow: hidden;
+		box-shadow: 0 4px 8px var(--color-bg-neutral-shade1);
+	}
+
+	canvas {
+		display: block;
+		background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+	}
+
+	.loading-overlay, .error-overlay {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(255, 255, 255, 0.9);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+	}
+
+	.error-overlay {
+		background: rgba(255, 235, 235, 0.95);
+		color: #d32f2f;
+		padding: 1rem;
+		text-align: center;
+	}
+
+	.loading-spinner {
+		width: 40px;
+		height: 40px;
+		border: 4px solid #f3f3f3;
+		border-top: 4px solid #3498db;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+	}
+
+	@keyframes spin {
+		0% { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
 	}
 
 	.screenshot {
